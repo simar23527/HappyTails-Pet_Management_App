@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --happy-purple: #8a4baf;
+  --happy-purple-dark: #6a3b8f;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  color: #333;
+  background-color: #fafafa;
+}
+
+.service-card {
+  @apply p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer border border-gray-100 bg-white;
+}
+
+.service-card:hover {
+  @apply border-happy-purple/30;
+}
+
+/* Custom utility classes */
+.text-happy-purple {
+  color: var(--happy-purple);
+}
+
+.text-happy-purple-dark {
+  color: var(--happy-purple-dark);
+}
+
+.bg-happy-purple {
+  background-color: var(--happy-purple);
+}
+
+.bg-happy-purple-dark {
+  background-color: var(--happy-purple-dark);
+}
+
+.hover\:bg-happy-purple:hover {
+  background-color: var(--happy-purple);
+}
+
+.hover\:bg-happy-purple-dark:hover {
+  background-color: var(--happy-purple-dark);
+}
+
+.from-happy-purple\/30 {
+  --tw-gradient-from: rgba(138, 75, 175, 0.3);
+}
+
+.to-happy-purple-dark\/20 {
+  --tw-gradient-to: rgba(106, 59, 143, 0.2);
+} 

@@ -1,0 +1,10 @@
+{
+  "/_app": "pages/_app.js",
+  "/_error": "pages/_error.js",
+  "/_document": "pages/_document.js",
+  "/home": "pages/home.js",
+  "/dashboard": "pages/dashboard.js",
+  "/PetAdoption": "pages/PetAdoption.js",
+  "/PetBreeds": "pages/PetBreeds.js",
+  "/api/sql/queries": "pages/api/sql/queries.js"
+}
