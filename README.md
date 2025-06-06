@@ -1,6 +1,7 @@
 # Happy Tales Pet Store Application
 
 This is a full-stack application for a pet store with features including pet adoption, product shopping, and vet services.
+cd C:\Users\DELL\Downloads\HappyTails-Pet_Management_App-main\HappyTails-Pet_Management_App-main
 
 ## Project Structure
 
