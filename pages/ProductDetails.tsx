@@ -8,11 +8,20 @@ import { Separator } from "../components/ui/separator";
 import { useCart } from "../context/CartContext";
 import { getProductById } from "../data/apiService";
 
+interface Product {
+  product_id: number;
+  name: string;
+  price: number;
+  description?: string;
+  image_url?: string;
+  category?: string;
+}
+
 const ProductDetails = () => {
   const router = useRouter();
   const { productId } = router.query;
   const [quantity, setQuantity] = React.useState(1);
-  const [product, setProduct] = React.useState(null);
+  const [product, setProduct] = React.useState<Product | null>(null);
   const [loading, setLoading] = React.useState(true);
   const { addItem } = useCart();
   
@@ -60,7 +69,7 @@ const ProductDetails = () => {
   const handleAddToCart = () => {
     for (let i = 0; i < quantity; i++) {
       addItem({
-        id: product.product_id,
+        product_id: product.product_id,
         name: product.name,
         price: product.price,
         image: product.image_url || "https://placehold.co/600x400?text=No+Image"
@@ -85,11 +94,15 @@ const ProductDetails = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="bg-gray-100 rounded-lg p-8 flex items-center justify-center">
-          <ShoppingCart className="w-32 h-32 text-gray-300" />
+          {product.image_url ? (
+            <img src={product.image_url} alt={product.name} className="max-w-full max-h-96 object-contain" />
+          ) : (
+            <ShoppingCart className="w-32 h-32 text-gray-300" />
+          )}
         </div>
 
         <div>
-          <h1 className="text-3xl font-bold mb-4">Product Name</h1>
+          <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
           <div className="flex items-center mb-4">
             <div className="flex items-center text-yellow-400">
               {[...Array(5)].map((_, i) => (
@@ -99,7 +112,11 @@ const ProductDetails = () => {
             <span className="ml-2 text-gray-600">(4.5/5)</span>
           </div>
 
-          <p className="text-3xl font-bold text-purple-600 mb-6">₹999</p>
+          <p className="text-3xl font-bold text-purple-600 mb-6">₹{product.price}</p>
+
+          {product.description && (
+            <p className="text-gray-700 mb-6">{product.description}</p>
+          )}
 
           <div className="flex items-center space-x-4 mb-6">
             <button
