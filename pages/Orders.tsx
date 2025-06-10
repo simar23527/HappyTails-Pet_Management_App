@@ -14,8 +14,22 @@ import {
 } from "../components/ui/select";
 import { getUserOrders } from "../data/apiService";
 
+interface OrderItem {
+  name: string;
+  quantity: number;
+  price: number;
+}
+
+interface Order {
+  id: string | number;
+  status: string;
+  date: string;
+  total: number;
+  items: OrderItem[];
+}
+
 const Orders = () => {
-  const [orders, setOrders] = useState([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   
   // For demo purposes, we'll use a hardcoded user ID
