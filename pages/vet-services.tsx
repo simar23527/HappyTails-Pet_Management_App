@@ -15,6 +15,7 @@ interface Vet {
 }
 
 const VetServicesPage = () => {
+  const router = useRouter();
   const [vets, setVets] = useState<Vet[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
