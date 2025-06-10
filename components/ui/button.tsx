@@ -4,10 +4,11 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'default' | 'outline' | 'link';
   asChild?: boolean;
   className?: string;
+  children?: React.ReactNode;
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className = '', variant = 'default', asChild = false, ...props }, ref) => {
+  ({ className = '', variant = 'default', asChild = false, children, ...props }, ref) => {
     const baseStyles = "inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50";
     
     const variantStyles = {
@@ -16,16 +17,23 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       link: "text-primary underline-offset-4 hover:underline p-0 text-purple-600",
     };
     
-    const Comp = asChild ? (props.children as React.ReactElement) : 'button';
-    const buttonProps = asChild ? { ...props, className: undefined, ref: undefined } : props;
+    const combinedClassName = `${baseStyles} ${variantStyles[variant]} ${className}`;
 
-    // @ts-ignore - the Comp type is complex and TypeScript is complaining
+    if (asChild && React.isValidElement(children)) {
+      return React.cloneElement(children, {
+        ...children.props,
+        className: `${children.props.className || ''} ${combinedClassName}`.trim(),
+      });
+    }
+
     return (
-      <Comp 
-        className={`${baseStyles} ${variantStyles[variant]} ${className}`}
+      <button 
+        className={combinedClassName}
         ref={ref}
-        {...buttonProps}
-      />
+        {...props}
+      >
+        {children}
+      </button>
     );
   }
 );
