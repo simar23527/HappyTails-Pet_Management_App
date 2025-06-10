@@ -68,4 +68,21 @@ const CardTitle = React.forwardRef<HTMLParagraphElement, CardTitleProps>(
 );
 CardTitle.displayName = "CardTitle";
 
-export { Card, CardContent, CardHeader, CardTitle }; 
+interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
+  className?: string;
+}
+
+const CardFooter = React.forwardRef<HTMLDivElement, CardFooterProps>(
+  ({ className = '', ...props }, ref) => {
+    return (
+      <div
+        ref={ref}
+        className={`flex items-center p-6 pt-0 ${className}`}
+        {...props}
+      />
+    );
+  }
+);
+CardFooter.displayName = "CardFooter";
+
+export { Card, CardContent, CardHeader, CardTitle, CardFooter }; 
