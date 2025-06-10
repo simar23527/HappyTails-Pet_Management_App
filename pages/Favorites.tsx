@@ -6,8 +6,17 @@ import { Card, CardContent, CardFooter } from "../components/ui/card";
 import { useCart } from "../context/CartContext";
 import { getUserFavorites } from "../data/apiService";
 
+interface FavoriteProduct {
+  id: number;
+  product_id: number;
+  name: string;
+  price: number;
+  image_url?: string;
+  description?: string;
+}
+
 const Favorites = () => {
-  const [favorites, setFavorites] = useState([]);
+  const [favorites, setFavorites] = useState<FavoriteProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const { addItem } = useCart();
   
@@ -31,19 +40,20 @@ const Favorites = () => {
     fetchFavorites();
   }, [userId]);
   
-  const handleAddToCart = (product: any) => {
+  const handleAddToCart = (product: FavoriteProduct) => {
     addItem({
-      id: product.product_id,
+      product_id: product.product_id,
       name: product.name,
       price: product.price,
-      image: product.image_url || "https://placehold.co/600x400?text=No+Image"
+      image: product.image_url || "https://placehold.co/400x300?text=No+Image"
     });
     
     console.log(`${product.name} added to cart`);
   };
   
-  const handleRemoveFavorite = (productId: string, productName: string) => {
+  const handleRemoveFavorite = (productId: number, productName: string) => {
     console.log(`${productName} removed from favorites`);
+    setFavorites(favorites.filter(item => item.product_id !== productId));
   };
   
   if (loading) {
@@ -92,16 +102,16 @@ const Favorites = () => {
           {favorites.map((product) => (
             <Card key={product.id} className="product-card flex flex-col">
               <div className="relative">
-                <Link href={`/shopping/product/${product.id}`}>
+                <Link href={`/shopping/product/${product.product_id}`}>
                   <img 
-                    src={product.image} 
+                    src={product.image_url || "https://placehold.co/600x400?text=No+Image"} 
                     alt={product.name} 
                     className="w-full h-48 object-cover"
                   />
                 </Link>
                 
                 <button 
-                  onClick={() => handleRemoveFavorite(product.id, product.name)}
+                  onClick={() => handleRemoveFavorite(product.product_id, product.name)}
                   className="absolute top-2 right-2 bg-white p-1.5 rounded-full shadow hover:bg-gray-100"
                 >
                   <Trash2 size={16} className="text-red-500" />
@@ -109,7 +119,7 @@ const Favorites = () => {
               </div>
               
               <CardContent className="p-4 flex-grow">
-                <Link href={`/shopping/product/${product.id}`}>
+                <Link href={`/shopping/product/${product.product_id}`}>
                   <h3 className="text-lg font-semibold mb-2 hover:text-purple-600 transition-colors">
                     {product.name}
                   </h3>
