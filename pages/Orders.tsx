@@ -51,8 +51,8 @@ const Orders = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
         <Link 
-          to="/profile" 
-          className="inline-flex items-center text-happy-purple hover:underline"
+          href="/profile" 
+          className="inline-flex items-center text-purple-600 hover:underline"
         >
           <ArrowLeft size={16} className="mr-2" />
           Back to Profile
@@ -124,9 +124,9 @@ const Orders = () => {
           </div>
           <h2 className="text-2xl font-semibold mb-2">No Orders Found</h2>
           <p className="text-gray-600 mb-6">You haven't placed any orders yet.</p>
-          <Button asChild>
-            <Link to="/shopping">Start Shopping</Link>
-          </Button>
+          <Link href="/shopping">
+            <Button>Start Shopping</Button>
+          </Link>
         </div>
       ) : (
         <div className="space-y-6">
@@ -169,7 +169,7 @@ const Orders = () => {
                       </div>
                       <div className="text-right mt-2 sm:mt-0">
                         <div>${(item.price * item.quantity).toFixed(2)}</div>
-                        <Button variant="link" size="sm" className="text-happy-purple p-0 h-auto">
+                        <Button variant="link" size="sm" className="text-purple-600 p-0 h-auto">
                           Buy Again
                         </Button>
                       </div>
