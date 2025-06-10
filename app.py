@@ -14,7 +14,7 @@ app = Flask(__name__)
 # Configure CORS
 CORS(app, resources={
     r"/*": {
-        "origins": ["http://localhost:3000"],
+        "origins": ["http://localhost:3000", "https://*.vercel.app", "*"],
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"]
     }
@@ -57,8 +57,10 @@ if __name__ == '__main__':
         db.initialize_db()
         
         print("Starting Flask server...")
+        # Get port from environment variable for deployment
+        port = int(os.environ.get('PORT', 5000))
         # Run the Flask application
-        app.run(debug=True, host='0.0.0.0', port=5000)
+        app.run(debug=False, host='0.0.0.0', port=port)
     except Exception as e:
         print(f"Error starting server: {str(e)}")
 
