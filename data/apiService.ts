@@ -192,6 +192,16 @@ export const getProductDetails = async (productId: number) => {
   }
 };
 
+export const getProductById = async (productId: number) => {
+  try {
+    const response = await apiClient.get(`/products/${productId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching product by ID:', error);
+    throw error;
+  }
+};
+
 // Cart Services
 export const getCart = async (username: string) => {
   try {
@@ -396,6 +406,26 @@ export const getAvailableStores = async (breedId: string): Promise<Store[]> => {
     return await response.json();
   } catch (error) {
     console.error('Error fetching available stores:', error);
+    throw error;
+  }
+};
+
+export const getUserOrders = async (username: string) => {
+  try {
+    const response = await apiClient.get(`/orders/history/${username}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching user orders:', error);
+    throw error;
+  }
+};
+
+export const getUserFavorites = async (username: string) => {
+  try {
+    const response = await apiClient.get(`/users/${username}/favorites`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching user favorites:', error);
     throw error;
   }
 }; 
