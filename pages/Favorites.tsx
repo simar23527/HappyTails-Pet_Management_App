@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { ArrowLeft, Heart, ShoppingCart, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
-import { useCart } from "@/context/CartContext";
-import { getUserFavorites } from "@/data/apiService";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardFooter } from "../components/ui/card";
+import { useCart } from "../context/CartContext";
+import { getUserFavorites } from "../data/apiService";
 
 const Favorites = () => {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
   const { addItem } = useCart();
   
   // For demo purposes, we'll use a hardcoded user ID
@@ -41,17 +39,11 @@ const Favorites = () => {
       image: product.image_url || "https://placehold.co/600x400?text=No+Image"
     });
     
-    toast({
-      title: "Added to cart",
-      description: `${product.name} has been added to your cart.`,
-    });
+    console.log(`${product.name} added to cart`);
   };
   
   const handleRemoveFavorite = (productId: string, productName: string) => {
-    toast({
-      title: "Removed from favorites",
-      description: `${productName} has been removed from your favorites.`,
-    });
+    console.log(`${productName} removed from favorites`);
   };
   
   if (loading) {
@@ -67,8 +59,8 @@ const Favorites = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
         <Link 
-          to="/profile" 
-          className="inline-flex items-center text-happy-purple hover:underline"
+          href="/profile" 
+          className="inline-flex items-center text-purple-600 hover:underline"
         >
           <ArrowLeft size={16} className="mr-2" />
           Back to Profile
@@ -91,16 +83,16 @@ const Favorites = () => {
           <p className="text-gray-600 mb-6">
             Start browsing and save items to your favorites list.
           </p>
-          <Button asChild>
-            <Link to="/shopping">Explore Products</Link>
-          </Button>
+          <Link href="/shopping">
+            <Button>Explore Products</Button>
+          </Link>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {favorites.map((product) => (
             <Card key={product.id} className="product-card flex flex-col">
               <div className="relative">
-                <Link to={`/shopping/product/${product.id}`}>
+                <Link href={`/shopping/product/${product.id}`}>
                   <img 
                     src={product.image} 
                     alt={product.name} 
@@ -117,8 +109,8 @@ const Favorites = () => {
               </div>
               
               <CardContent className="p-4 flex-grow">
-                <Link to={`/shopping/product/${product.id}`}>
-                  <h3 className="text-lg font-semibold mb-2 hover:text-happy-purple transition-colors">
+                <Link href={`/shopping/product/${product.id}`}>
+                  <h3 className="text-lg font-semibold mb-2 hover:text-purple-600 transition-colors">
                     {product.name}
                   </h3>
                 </Link>
@@ -128,7 +120,7 @@ const Favorites = () => {
               
               <CardFooter className="p-4 pt-0">
                 <Button 
-                  className="w-full bg-happy-purple hover:bg-happy-purple-dark flex items-center justify-center gap-2"
+                  className="w-full bg-purple-600 hover:bg-purple-700 flex items-center justify-center gap-2"
                   onClick={() => handleAddToCart(product)}
                 >
                   <ShoppingCart size={16} />
