@@ -2,8 +2,18 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  const user = request.cookies.get('user');
-  const isLoggedIn = user && JSON.parse(user).isLoggedIn;
+  const userCookie = request.cookies.get('user');
+  let isLoggedIn = false;
+  
+  if (userCookie && userCookie.value) {
+    try {
+      const userData = JSON.parse(userCookie.value);
+      isLoggedIn = userData.isLoggedIn;
+    } catch (error) {
+      // If JSON parsing fails, treat as not logged in
+      isLoggedIn = false;
+    }
+  }
 
   // List of protected routes
   const protectedRoutes = ['/PetShopping', '/ProductListing', '/Cart', '/Checkout'];
