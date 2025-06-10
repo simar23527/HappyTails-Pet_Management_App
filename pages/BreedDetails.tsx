@@ -22,7 +22,7 @@ const BreedDetails = () => {
       
       try {
         setLoading(true);
-        const data = await getBreedById(breedId);
+        const data = await getBreedById(Number(breedId));
         
         if (data) {
           setBreedDetails(data);
