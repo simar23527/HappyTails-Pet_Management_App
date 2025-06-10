@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';  // Hardcode the URL for now
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 console.log('API URL:', API_URL); // Debug log
 
@@ -111,6 +111,16 @@ export const getBreedDetails = async (breedId: number) => {
     return response.data;
   } catch (error) {
     console.error('Error fetching breed details:', error);
+    throw error;
+  }
+};
+
+export const getBreedById = async (breedId: number) => {
+  try {
+    const response = await apiClient.get(`/pets/breeds/${breedId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching breed by ID:', error);
     throw error;
   }
 };
