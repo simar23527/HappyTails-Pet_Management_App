@@ -2,12 +2,11 @@ import React from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { ArrowLeft, Heart, Minus, Plus, ShoppingCart, Star, Truck } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { useCart } from "@/context/CartContext";
-import { useToast } from "@/hooks/use-toast";
-import { getProductById } from "@/data/apiService";
+import { Button } from "../components/ui/button";
+import { Card } from "../components/ui/card";
+import { Separator } from "../components/ui/separator";
+import { useCart } from "../context/CartContext";
+import { getProductById } from "../data/apiService";
 
 const ProductDetails = () => {
   const router = useRouter();
@@ -16,14 +15,13 @@ const ProductDetails = () => {
   const [product, setProduct] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
   const { addItem } = useCart();
-  const { toast } = useToast();
   
   React.useEffect(() => {
     const fetchProduct = async () => {
       setLoading(true);
       try {
         if (productId) {
-          const productData = await getProductById(productId);
+          const productData = await getProductById(Number(productId));
           setProduct(productData);
         }
       } catch (error) {
@@ -69,10 +67,8 @@ const ProductDetails = () => {
       });
     }
     
-    toast({
-      title: "Added to cart",
-      description: `${quantity} ${quantity === 1 ? 'item' : 'items'} have been added to your cart.`,
-    });
+    // Toast notification removed for simplicity
+    console.log(`${quantity} items added to cart`);
   };
 
   return (
