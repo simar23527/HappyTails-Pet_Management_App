@@ -74,6 +74,12 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }: AuthModalProps) => {
           isLoggedIn: true
         }));
         
+        // Also set cookie for middleware
+        document.cookie = `user=${JSON.stringify({
+          username: data.username,
+          isLoggedIn: true
+        })}; path=/`;
+        
         // Close modal and call onLoginSuccess if provided
         onClose();
         if (onLoginSuccess) {
