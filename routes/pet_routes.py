@@ -45,18 +45,42 @@ def get_pet_types():
 @pet_routes.route('/types/<int:pet_type_id>/breeds', methods=['GET'])
 def get_breeds_by_pet_type(pet_type_id):
     """Get all breeds for a specific pet type"""
+    print(f"=== BREEDS ENDPOINT CALLED with pet_type_id: {pet_type_id} ===")
     try:
+        # Use a fresh database instance like the working endpoints
+        from services.database import Database
+        fresh_db = Database()
+        
+        # First verify the pet type exists using uppercase (like test-db endpoint)
+        type_check_query = "SELECT PetTypeID, PetTypeName FROM PetType WHERE PetTypeID = %s"
+        pet_type_result = fresh_db.execute_query_with_column_names(type_check_query, (pet_type_id,))
+        print(f"Pet type check result: {pet_type_result}")
+        
+        if not pet_type_result:
+            return jsonify({"error": f"Pet type with ID {pet_type_id} not found"}), 404
+        
+        # Use the PROVEN working approach from test-db endpoint
+        # This uses JOIN like the working breeds_by_type query
         query = """
-            SELECT b.BreedID as id, b.BreedName as name, b.AverageLifespan as averagelifespan, 
-                   pt.PetTypeID as pet_type_id, pt.PetTypeName as pet_type_name,
-                   b.ImageURL as imageurl
-            FROM Breed b
-            JOIN PetType pt ON b.PetTypeID = pt.PetTypeID
-            WHERE b.PetTypeID = %s
+            SELECT b.BreedID as id, b.BreedName as name, b.AverageLifespan as averagelifespan,
+                   pt.PetTypeID as pet_type_id, pt.PetTypeName as pet_type_name
+            FROM PetType pt
+            INNER JOIN Breed b ON pt.PetTypeID = b.PetTypeID
+            WHERE pt.PetTypeID = %s
+            ORDER BY b.BreedName
         """
-        breeds = db.execute_query_with_column_names(query, (pet_type_id,))
+        print(f"Executing JOIN query (like test-db): {query}")
+        print(f"With parameter: {pet_type_id}")
+        
+        breeds = fresh_db.execute_query_with_column_names(query, (int(pet_type_id),))
+        print(f"JOIN query result: {breeds}")
+        print(f"Number of breeds found: {len(breeds)}")
+        
         return jsonify(breeds)
     except Exception as e:
+        print(f"Error in get_breeds_by_pet_type: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
 @pet_routes.route('/breeds/<int:breed_id>', methods=['GET'])
