@@ -54,6 +54,11 @@ def index():
 def health_check():
     return jsonify({"status": "healthy", "api_version": "2.2"})
 
+@app.before_request
+def log_request_info():
+    print(f"Request: {request.method} {request.url}")
+    print(f"Endpoint: {request.endpoint}")
+
 @app.route('/test-db')
 def test_db():
     try:
