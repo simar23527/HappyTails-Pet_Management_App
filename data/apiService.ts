@@ -276,10 +276,21 @@ export const getOrderDetails = async (orderId: number) => {
 };
 
 // Vet Services
-export const getVets = async (filters = {}) => {
+export const getVets = async (filters: { city?: string; state?: string; rating?: number } = {}) => {
   try {
-    const response = await apiClient.get('/vets/list', { params: filters });
-    return response.data;
+    const queryParams = new URLSearchParams();
+    if (filters.city) queryParams.append('city', filters.city);
+    if (filters.state) queryParams.append('state', filters.state);
+    if (filters.rating) queryParams.append('rating', filters.rating.toString());
+    
+    const url = `/api/vets/list${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return await response.json();
   } catch (error) {
     console.error('Error fetching vets:', error);
     throw error;
@@ -288,8 +299,13 @@ export const getVets = async (filters = {}) => {
 
 export const getVetDetails = async (vetId: number) => {
   try {
-    const response = await apiClient.get(`/vets/${vetId}`);
-    return response.data;
+    const response = await fetch(`/api/vets/${vetId}`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return await response.json();
   } catch (error) {
     console.error('Error fetching vet details:', error);
     throw error;
@@ -298,8 +314,13 @@ export const getVetDetails = async (vetId: number) => {
 
 export const getVetCities = async () => {
   try {
-    const response = await apiClient.get('/vets/cities');
-    return response.data;
+    const response = await fetch('/api/vets/cities');
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return await response.json();
   } catch (error) {
     console.error('Error fetching vet cities:', error);
     throw error;
@@ -308,8 +329,13 @@ export const getVetCities = async () => {
 
 export const getVetStates = async () => {
   try {
-    const response = await apiClient.get('/vets/states');
-    return response.data;
+    const response = await fetch('/api/vets/states');
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return await response.json();
   } catch (error) {
     console.error('Error fetching vet states:', error);
     throw error;
