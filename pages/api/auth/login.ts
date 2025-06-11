@@ -12,18 +12,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'Username and password required' });
     }
 
-    // Get the Flask backend URL from environment variable
+    // Get the Flask backend URL with cache busting
     const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://happy-tails-api.onrender.com';
+    const timestamp = Date.now();
     
-    console.log(`Attempting to connect to: ${backendUrl}/api/users/login`);
+    console.log(`Attempting login to: ${backendUrl}/api/users/login?t=${timestamp}`);
     
-    // Forward the request to Flask backend
-    const response = await fetch(`${backendUrl}/api/users/login`, {
+    // Forward the request to Flask backend with cache-busting
+    const response = await fetch(`${backendUrl}/api/users/login?t=${timestamp}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
       },
-      body: JSON.stringify(req.body),
+      body: JSON.stringify({ username, password }),
     });
 
     console.log(`Backend response status: ${response.status}`);
