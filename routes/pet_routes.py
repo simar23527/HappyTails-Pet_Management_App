@@ -1,240 +1,104 @@
-from flask import Blueprint, jsonify, request
+from flask import Flask, jsonify, request
+from flask_cors import CORS
+import os
 from services.database import Database
-import requests
+try:
+    print("Importing route modules...")
+    from routes.pet_routes import pet_routes
+    print("Successfully imported pet_routes")
+    from routes.product_routes import product_routes
+    print("Successfully imported product_routes")
+    from routes.vet_routes import vet_routes
+    print("Successfully imported vet_routes")
+    from routes.user_routes import user_routes
+    print("Successfully imported user_routes")
+    from routes.order_routes import order_routes
+    print("Successfully imported order_routes")
+    from routes.shopping_category_routes import shopping_category_routes
+    print("Successfully imported shopping_category_routes")
+    print("All route imports successful!")
+except Exception as e:
+    print(f"ERROR importing routes: {e}")
+    import traceback
+    traceback.print_exc()
 
-pet_routes = Blueprint('pet_routes', __name__)
-db = Database()
+app = Flask(__name__)
 
-@pet_routes.route('/types', methods=['GET'])
-def get_pet_types():
-    """Get all pet types"""
+# Configure CORS
+CORS(app, resources={
+    r"/*": {
+        "origins": ["http://localhost:3000", "https://*.vercel.app", "*"],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
+
+# Register all route blueprints
+print("Registering route blueprints...")
+app.register_blueprint(pet_routes, url_prefix='/api/pets')
+print("Registered pet_routes")
+app.register_blueprint(product_routes, url_prefix='/api/products')
+print("Registered product_routes")
+app.register_blueprint(vet_routes, url_prefix='/api/vets')
+print("Registered vet_routes")
+app.register_blueprint(user_routes, url_prefix='/api/users')
+print("Registered user_routes")
+app.register_blueprint(order_routes, url_prefix='/api/orders')
+print("Registered order_routes")
+app.register_blueprint(shopping_category_routes, url_prefix='/api/shopping-categories')
+print("Registered shopping_category_routes")
+print("All routes registered successfully!")
+
+# Debug: Print all registered routes
+print("\n=== REGISTERED ROUTES ===")
+for rule in app.url_map.iter_rules():
+    print(f"Route: {rule.rule} -> Methods: {rule.methods} -> Endpoint: {rule.endpoint}")
+print("=== END ROUTES ===\n")
+
+@app.route('/')
+def index():
+    print("=== ROOT ROUTE CALLED ===")
+    return jsonify({"message": "Welcome to Happy Tales API"})
+
+@app.route('/test-db')
+def test_db():
     try:
-        query = """
-            SELECT 
-                PetTypeID as id,
-                PetTypeName as name
-            FROM PetType
-            ORDER BY PetTypeName
-        """
-        pet_types = db.execute_query_with_column_names(query)
-        
-        # Add descriptions for the pet types
-        for pet_type in pet_types:
-            if pet_type['name'].lower() == 'dog':
-                pet_type['description'] = 'Loyal companions ready to join your family'
-            elif pet_type['name'].lower() == 'cat':
-                pet_type['description'] = 'Independent and loving feline friends'
-            elif pet_type['name'].lower() == 'fish':
-                pet_type['description'] = 'Peaceful aquatic pets for your home'
-            elif pet_type['name'].lower() == 'bird':
-                pet_type['description'] = 'Colorful and cheerful avian companions'
-            else:
-                pet_type['description'] = 'Find your perfect companion'
-                
-        return jsonify(pet_types)
-    except Exception as e:
-        print(f"Error fetching pet types: {str(e)}")  # Debug logging
-        return jsonify({"error": str(e)}), 500
-
-@pet_routes.route('/types/<int:pet_type_id>/breeds', methods=['GET'])
-def get_breeds_by_pet_type(pet_type_id):
-    """Get all breeds for a specific pet type"""
-    try:
-        query = """
-            SELECT b.BreedID as id, b.BreedName as name, b.AverageLifespan as averagelifespan, 
-                   pt.PetTypeID as pet_type_id, pt.PetTypeName as pet_type_name,
-                   b.ImageURL as imageurl
-            FROM Breed b
-            JOIN PetType pt ON b.PetTypeID = pt.PetTypeID
-            WHERE b.PetTypeID = %s
-        """
-        breeds = db.execute_query_with_column_names(query, (pet_type_id,))
-        return jsonify(breeds)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@pet_routes.route('/breeds/<int:breed_id>', methods=['GET'])
-def get_breed_details(breed_id):
-    """Get details for a specific breed"""
-    try:
-        # Query to get breed details
-        query = """
-            SELECT b.BreedID as id, b.BreedName as name, b.AverageLifespan as averagelifespan, 
-                   pt.PetTypeID as pet_type_id, pt.PetTypeName as pet_type_name
-            FROM Breed b
-            JOIN PetType pt ON b.PetTypeID = pt.PetTypeID
-            WHERE b.BreedID = %s
-        """
-        breeds = db.execute_query_with_column_names(query, (breed_id,))
-        
-        if not breeds:
-            return jsonify({"error": "Breed not found"}), 404
-        
-        breed_details = breeds[0]
-        
-        # Query to get store availability for this breed
-        availability_query = """
-            SELECT s.StoreID as storeid, s.Name as store_name, s.Address as address, s.ContactNumber as contactnumber, 
-                   s.City as city, s.State as state, a.Available as available
-            FROM Availability a
-            JOIN Store s ON a.StoreID = s.StoreID
-            WHERE a.BreedID = %s AND a.Available > 0
-        """
-        availability = db.execute_query_with_column_names(availability_query, (breed_id,))
-        breed_details['availability'] = availability
-        
-        return jsonify(breed_details)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@pet_routes.route('/available', methods=['GET'])
-def get_available_pets():
-    """Get all available pets (for adoption page)"""
-    try:
-        query = """
-            SELECT a.BreedID as breedid, b.BreedName as breedname, pt.PetTypeName as pettypename, 
-                   SUM(a.Available) as total_available
-            FROM Availability a
-            JOIN Breed b ON a.BreedID = b.BreedID
-            JOIN PetType pt ON b.PetTypeID = pt.PetTypeID
-            GROUP BY a.BreedID, b.BreedName, pt.PetTypeName
-            HAVING SUM(a.Available) > 0
-            ORDER BY total_available DESC
-        """
-        available_pets = db.execute_query_with_column_names(query)
-        return jsonify(available_pets)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-@pet_routes.route('/breeds/<int:breed_id>/image', methods=['GET'])
-def get_breed_image(breed_id):
-    """Get or update image for a specific breed"""
-    try:
-        # Get breed information
-        breed_query = """
-            SELECT b.BreedName, p.PetTypeName 
-            FROM Breed b
-            JOIN PetType p ON b.PetTypeID = p.PetTypeID
-            WHERE b.BreedID = %s
-        """
-        breed_info = db.execute_query_with_column_names(breed_query, (breed_id,))
-        
-        if not breed_info:
-            return jsonify({"error": "Breed not found"}), 404
-            
-        breed = breed_info[0]
-        breed_name = breed['breedname'].lower()
-        pet_type = breed['pettypename'].lower()
-        
-        # Check if we already have an image URL
-        if breed.get('imageurl'):
-            return jsonify({"image_url": breed['imageurl']})
-            
-        # Fetch image based on pet type
-        image_url = None
-        if pet_type == 'dog':
-            # Use Dog CEO API
-            response = requests.get(f'https://dog.ceo/api/breed/{breed_name}/images/random')
-            if response.status_code == 200:
-                image_url = response.json()['message']
-        elif pet_type == 'cat':
-            # Use TheCatAPI
-            response = requests.get(f'https://api.thecatapi.com/v1/images/search?breed_ids={breed_name}')
-            if response.status_code == 200 and response.json():
-                image_url = response.json()[0]['url']
-        # Add more pet types as needed
-        
-        if image_url:
-            # Update the breed with the new image URL
-            update_query = """
-                UPDATE Breed
-                SET ImageURL = %s
-                WHERE BreedID = %s
-            """
-            db.execute_query(update_query, (image_url, breed_id), fetch=False)
-            
+        db = Database()
+        query = "SELECT * FROM PetType"  # Changed to check PetType table
+        result = db.execute_query_with_column_names(query)
         return jsonify({
-            "image_url": image_url or "default-breed.jpg"
+            "status": "success",
+            "message": "Database connection successful",
+            "pet_types": result
         })
-        
     except Exception as e:
-        print(f"Error fetching breed image: {str(e)}")
-        return jsonify({"error": str(e)}), 500 
+        print(f"Database error: {str(e)}")  # Add debug print
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
 
+@app.route('/api/test-simple')
+def test_simple():
+    print("=== SIMPLE TEST ENDPOINT CALLED ===")
+    return jsonify({"message": "Simple test endpoint works", "status": "success"})
 
-@pet_routes.route('/adopt', methods=['POST'])
-def adopt_pet():
-    """Adopt a pet"""
+if __name__ == '__main__':
     try:
-        data = request.get_json()
-        username = data.get('username')
-        breed_id = data.get('breed_id')
-        store_id = data.get('store_id')
+        # Initialize database on startup
+        db = Database()
+        db.initialize_db()
         
-        if not all([username, breed_id, store_id]):
-            return jsonify({"error": "Missing required fields"}), 400
-        
-        # Check if the pet is available in the specified store
-        availability_query = """
-            SELECT Available FROM Availability 
-            WHERE BreedID = %s AND StoreID = %s
-        """
-        availability = db.execute_query(availability_query, (breed_id, store_id))
-        
-        if not availability or availability[0][0] <= 0:
-            return jsonify({"error": "Pet not available at this store"}), 400
-        
-        # Create a new pet record
-        create_pet_query = """
-            INSERT INTO Pet (PetTypeID, Gender, Age, BreedID, Owner)
-            SELECT b.PetTypeID, 
-                   CASE WHEN random() > 0.5 THEN 'Male' ELSE 'Female' END,
-                   CEILING(random() * 5), 
-                   %s, 
-                   %s
-            FROM Breed b
-            WHERE b.BreedID = %s
-            RETURNING PetID
-        """
-        pet_id = db.execute_query(create_pet_query, (breed_id, username, breed_id))
-        
-        if not pet_id:
-            return jsonify({"error": "Failed to create pet record"}), 500
-        
-        # Create adoption record
-        adoption_query = """
-            INSERT INTO Adoption (Username, PetID)
-            VALUES (%s, %s)
-        """
-        db.execute_query(adoption_query, (username, pet_id[0][0]), fetch=False)
-        
-        # Update availability
-        update_query = """
-            UPDATE Availability
-            SET Available = Available - 1
-            WHERE BreedID = %s AND StoreID = %s
-        """
-        db.execute_query(update_query, (breed_id, store_id), fetch=False)
-        
-        return jsonify({"success": True, "pet_id": pet_id[0][0]})
+        print("Starting Flask server...")
+        # Get port from environment variable for deployment
+        port = int(os.environ.get('PORT', 5000))
+        # Run the Flask application
+        app.run(debug=False, host='0.0.0.0', port=port)
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print(f"Error starting server: {str(e)}")
 
-@pet_routes.route('/breeds/<int:breed_id>/stores', methods=['GET'])
-def get_available_stores_for_breed(breed_id):
-    """Get stores where a specific breed is available"""
-    try:
-        query = """
-            SELECT s.StoreID as id, s.Name as name, s.Address as address, 
-                   s.ContactNumber as contactnumber, s.City as city, s.State as state,
-                   a.Available as available
-            FROM Availability a
-            JOIN Store s ON a.StoreID = s.StoreID
-            WHERE a.BreedID = %s AND a.Available > 0
-            ORDER BY s.Name
-        """
-        stores = db.execute_query_with_column_names(query, (breed_id,))
-        return jsonify(stores)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500 
+db_host = os.environ.get('DB_HOST', 'localhost')
+db_name = os.environ.get('DB_NAME', 'Project')
+db_user = os.environ.get('DB_USER', 'postgres')
+db_password = os.environ.get('DB_PASSWORD', '23562')
+db_port = os.environ.get('DB_PORT', '5432') 
