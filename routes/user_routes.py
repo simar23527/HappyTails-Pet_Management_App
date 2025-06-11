@@ -45,6 +45,11 @@ def register():
         username = data.get('username')
         password = data.get('password')
         email = data.get('email')
+        name = data.get('name', '')
+        phone = data.get('phone', '')
+        address = data.get('address', '')
+        city = data.get('city', '')
+        state = data.get('state', '')
 
         if not all([username, password, email]):
             return jsonify({"error": "Missing required fields"}), 400
@@ -56,12 +61,12 @@ def register():
         if existing_user:
             return jsonify({"error": "Username already exists"}), 400
 
-        # Insert new user
+        # Insert new user with all fields
         insert_query = """
-            INSERT INTO Users (Username, Password, Email)
-            VALUES (%s, %s, %s)
+            INSERT INTO Users (Username, Password, Email, Name, Phone, Address, City, State)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """
-        db.execute_query(insert_query, (username, password, email), fetch=False)
+        db.execute_query(insert_query, (username, password, email, name, phone, address, city, state), fetch=False)
 
         return jsonify({"message": "Registration successful"}), 201
 
