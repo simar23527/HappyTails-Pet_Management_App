@@ -69,12 +69,6 @@ const Navbar = () => {
 
             <div className="flex items-center space-x-8">
               <Link 
-                href="/dashboard" 
-                className={`text-base ${router.pathname === '/dashboard' ? 'text-purple-600 font-medium' : 'text-gray-600 hover:text-gray-900'}`}
-              >
-                Dashboard
-              </Link>
-              <Link 
                 href="/home" 
                 className={`text-base ${router.pathname === '/home' ? 'text-purple-600 font-medium' : 'text-gray-600 hover:text-gray-900'}`}
               >
