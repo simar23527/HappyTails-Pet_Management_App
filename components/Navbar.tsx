@@ -40,6 +40,8 @@ const Navbar = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('user');
+    // Also clear cookie for middleware
+    document.cookie = 'user=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
     setUser(null);
     setIsAccountMenuOpen(false);
     router.push('/');
