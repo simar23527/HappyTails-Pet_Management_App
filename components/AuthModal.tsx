@@ -51,8 +51,7 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }: AuthModalProps) => {
     try {
       if (isLogin) {
         // Handle login
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://happy-tails-api.onrender.com';
-        const response = await fetch(`${apiUrl}/api/users/login`, {
+        const response = await fetch('/api/auth/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -91,8 +90,7 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }: AuthModalProps) => {
         router.push('/home');
       } else {
         // Handle signup
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://happy-tails-api.onrender.com';
-        const response = await fetch(`${apiUrl}/api/users/register`, {
+        const response = await fetch('/api/auth/signup', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
