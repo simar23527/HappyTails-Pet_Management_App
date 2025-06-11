@@ -82,12 +82,29 @@ def test_direct():
 def test_db():
     try:
         db = Database()
-        query = "SELECT * FROM PetType"
-        result = db.execute_query_with_column_names(query)
+        # Test pet types
+        pet_types_query = "SELECT * FROM PetType"
+        pet_types = db.execute_query_with_column_names(pet_types_query)
+        
+        # Test breeds
+        breeds_query = "SELECT COUNT(*) as total_breeds FROM Breed"
+        breed_count = db.execute_query_with_column_names(breeds_query)
+        
+        # Test breeds by pet type
+        breeds_by_type_query = """
+            SELECT pt.PetTypeName, COUNT(b.BreedID) as breed_count
+            FROM PetType pt
+            LEFT JOIN Breed b ON pt.PetTypeID = b.PetTypeID
+            GROUP BY pt.PetTypeID, pt.PetTypeName
+        """
+        breeds_by_type = db.execute_query_with_column_names(breeds_by_type_query)
+        
         return jsonify({
             "status": "success",
             "message": "Database connection successful",
-            "pet_types": result
+            "pet_types": pet_types,
+            "total_breeds": breed_count[0] if breed_count else {"total_breeds": 0},
+            "breeds_by_type": breeds_by_type
         })
     except Exception as e:
         print(f"Database error: {str(e)}")
