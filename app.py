@@ -8,9 +8,15 @@ app = Flask(__name__)
 # Configure CORS
 CORS(app, resources={
     r"/*": {
-        "origins": ["http://localhost:3000", "https://*.vercel.app", "*"],
+        "origins": [
+            "http://localhost:3000", 
+            "https://happy-tails-pet-management-app.vercel.app",
+            "https://*.vercel.app", 
+            "*"
+        ],
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization"]
+        "allow_headers": ["Content-Type", "Authorization", "Cache-Control", "Pragma", "Expires"],
+        "supports_credentials": True
     }
 })
 
@@ -41,8 +47,14 @@ except Exception as e:
 def index():
     from flask import make_response
     response = make_response(jsonify({
-        "message": "Happy Tales API - CACHE BROKEN v3.1", 
-        "status": "working"
+        "message": "Happy Tales API - CORS Fixed v3.2", 
+        "status": "working",
+        "timestamp": f"{os.environ.get('PORT', '5000')}",
+        "endpoints": {
+            "health": "/health",
+            "test": "/api/test-direct",
+            "auth": "/api/users/login and /api/users/register"
+        }
     }))
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     response.headers['Pragma'] = 'no-cache'
