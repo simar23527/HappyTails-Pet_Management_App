@@ -99,6 +99,53 @@ def test_db():
         """
         breeds_by_type = db.execute_query_with_column_names(breeds_by_type_query)
         
+        # NEW: Test different approaches to get breeds
+        # Test 1: Without WHERE clause - uppercase table name
+        all_breeds_query_upper = """
+            SELECT BreedID as id, BreedName as name, AverageLifespan as averagelifespan, PetTypeID
+            FROM Breed 
+            ORDER BY BreedName
+            LIMIT 10
+        """
+        all_breeds_upper = db.execute_query_with_column_names(all_breeds_query_upper)
+        
+        # Test 1b: Without WHERE clause - lowercase table name
+        all_breeds_query_lower = """
+            SELECT breedid as id, breedname as name, averagelifespan as averagelifespan, pettypeid
+            FROM breed 
+            ORDER BY breedname
+            LIMIT 10
+        """
+        all_breeds_lower = db.execute_query_with_column_names(all_breeds_query_lower)
+        
+        # Test 2: Test ORDER BY clause impact
+        # Working query (SELECT * without ORDER BY)
+        pettype_no_order_query = "SELECT * FROM PetType"
+        pettype_no_order = db.execute_query_with_column_names(pettype_no_order_query)
+        
+        # Test with ORDER BY 
+        pettype_with_order_query = "SELECT * FROM PetType ORDER BY PetTypeID"
+        pettype_with_order = db.execute_query_with_column_names(pettype_with_order_query)
+        
+        # Test lowercase column names
+        pettype_lower_query = """
+            SELECT pettypeid, pettypename 
+            FROM PetType 
+            ORDER BY pettypeid
+        """
+        pettype_lower = db.execute_query_with_column_names(pettype_lower_query)
+        
+        # Test Breed with lowercase column names
+        breed_lower_query = """
+            SELECT breedid, breedname, pettypeid
+            FROM Breed 
+            ORDER BY breedid
+            LIMIT 5
+        """
+        breed_lower = db.execute_query_with_column_names(breed_lower_query)
+        
+
+        
         # Check all tables
         tables_query = """
             SELECT table_name 
@@ -113,7 +160,13 @@ def test_db():
             "database_tables": tables,
             "pet_types": pet_types,
             "total_breeds": breed_count[0] if breed_count else {"total_breeds": 0},
-            "breeds_by_type": breeds_by_type
+            "breeds_by_type": breeds_by_type,
+            "all_breeds_upper": all_breeds_upper,
+            "all_breeds_lower": all_breeds_lower,
+            "pettype_no_order": pettype_no_order,
+            "pettype_with_order": pettype_with_order,
+            "pettype_lower": pettype_lower,
+            "breed_lower": breed_lower
         })
     except Exception as e:
         print(f"Database error: {str(e)}")
@@ -121,6 +174,99 @@ def test_db():
             "status": "error",
             "message": str(e)
         }), 500
+
+@app.route('/test-breeds/<int:pet_type_id>', methods=['GET'])
+def test_breeds(pet_type_id):
+    """Test breeds endpoint in app.py - should work like test-db"""
+    try:
+        db = Database()
+        print(f"=== TEST BREEDS ENDPOINT ===")
+        print(f"Pet Type ID: {pet_type_id}")
+        
+        # Use same approach as test-db endpoint
+        query = """
+            SELECT BreedID as id, BreedName as name, AverageLifespan as averagelifespan,
+                   PetTypeID as pet_type_id
+            FROM Breed 
+            WHERE PetTypeID = %s
+            ORDER BY BreedName
+        """
+        
+        breeds = db.execute_query_with_column_names(query, (pet_type_id,))
+        print(f"Direct query result: {breeds}")
+        
+        return jsonify(breeds)
+        
+    except Exception as e:
+        print(f"Test breeds error: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+        
+@app.route('/debug-breeds/<int:pet_type_id>', methods=['GET'])
+def debug_breeds(pet_type_id):
+    """Debug endpoint to test breed queries"""
+    try:
+        from services.database import Database
+        db = Database()
+        
+        # Test the exact query used in pet_routes.py
+        print(f"=== DEBUG BREEDS ENDPOINT ===")
+        print(f"Pet Type ID: {pet_type_id}")
+        
+        # First, let's check if pet type exists
+        type_query = "SELECT * FROM PetType WHERE PetTypeID = %s"
+        pet_type = db.execute_query_with_column_names(type_query, (pet_type_id,))
+        print(f"Pet Type Query Result: {pet_type}")
+        
+        # Check breeds table structure
+        structure_query = """
+            SELECT column_name, data_type 
+            FROM information_schema.columns 
+            WHERE table_name = 'breed'
+        """
+        structure = db.execute_query_with_column_names(structure_query)
+        print(f"Breed Table Structure: {structure}")
+        
+        # Test basic breed query
+        basic_query = "SELECT * FROM Breed LIMIT 5"
+        basic_breeds = db.execute_query_with_column_names(basic_query)
+        print(f"Basic Breed Query (first 5): {basic_breeds}")
+        
+        # Test breed count by pet type
+        count_query = """
+            SELECT PetTypeID, COUNT(*) as breed_count 
+            FROM Breed 
+            GROUP BY PetTypeID
+        """
+        counts = db.execute_query_with_column_names(count_query)
+        print(f"Breed counts by pet type: {counts}")
+        
+        # Test the exact problematic query
+        problem_query = """
+            SELECT b.BreedID as id, b.BreedName as name, b.AverageLifespan as averagelifespan, 
+                   pt.PetTypeID as pet_type_id, pt.PetTypeName as pet_type_name
+            FROM Breed b
+            JOIN PetType pt ON b.PetTypeID = pt.PetTypeID
+            WHERE b.PetTypeID = %s
+        """
+        problem_result = db.execute_query_with_column_names(problem_query, (pet_type_id,))
+        print(f"Problem Query Result: {problem_result}")
+        
+        return jsonify({
+            "pet_type": pet_type,
+            "structure": structure,
+            "basic_breeds": basic_breeds,
+            "counts": counts,
+            "problem_query_result": problem_result,
+            "pet_type_id": pet_type_id
+        })
+        
+    except Exception as e:
+        print(f"Debug error: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     try:
