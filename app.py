@@ -99,9 +99,18 @@ def test_db():
         """
         breeds_by_type = db.execute_query_with_column_names(breeds_by_type_query)
         
+        # Check all tables
+        tables_query = """
+            SELECT table_name 
+            FROM information_schema.tables 
+            WHERE table_schema = 'public'
+        """
+        tables = db.execute_query_with_column_names(tables_query)
+        
         return jsonify({
             "status": "success",
             "message": "Database connection successful",
+            "database_tables": tables,
             "pet_types": pet_types,
             "total_breeds": breed_count[0] if breed_count else {"total_breeds": 0},
             "breeds_by_type": breeds_by_type
