@@ -51,7 +51,7 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }: AuthModalProps) => {
     try {
       if (isLogin) {
         // Handle login
-        const response = await fetch('/api/auth/login', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -90,7 +90,7 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }: AuthModalProps) => {
         router.push('/home');
       } else {
         // Handle signup
-        const response = await fetch('/api/auth/signup', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/register`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
