@@ -107,16 +107,16 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }: AuthModalProps) => {
         // Switch to login form after successful signup
         setIsLogin(true);
         setError('Account created successfully! Please login.');
-        // Reset form
+        // Keep username and password, reset other fields
         setFormData({
-          username: '',
+          username: formData.username,
           name: '',
           email: '',
           phone: '',
           address: '',
           city: '',
           state: '',
-          password: ''
+          password: formData.password
         });
       }
     } catch (err) {
