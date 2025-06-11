@@ -49,8 +49,15 @@ app.register_blueprint(shopping_category_routes, url_prefix='/api/shopping-categ
 print("Registered shopping_category_routes")
 print("All routes registered successfully!")
 
+# Debug: Print all registered routes
+print("\n=== REGISTERED ROUTES ===")
+for rule in app.url_map.iter_rules():
+    print(f"Route: {rule.rule} -> Methods: {rule.methods} -> Endpoint: {rule.endpoint}")
+print("=== END ROUTES ===\n")
+
 @app.route('/')
 def index():
+    print("=== ROOT ROUTE CALLED ===")
     return jsonify({"message": "Welcome to Happy Tales API"})
 
 @app.route('/test-db')
@@ -70,6 +77,11 @@ def test_db():
             "status": "error",
             "message": str(e)
         }), 500
+
+@app.route('/api/test-simple')
+def test_simple():
+    print("=== SIMPLE TEST ENDPOINT CALLED ===")
+    return jsonify({"message": "Simple test endpoint works", "status": "success"})
 
 if __name__ == '__main__':
     try:
