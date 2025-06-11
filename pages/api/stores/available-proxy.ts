@@ -16,7 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'Breed ID is required' });
     }
 
-    const apiUrl = `${backendUrl}/api/pets/stores?breedId=${breedId}`;
+    const apiUrl = `${backendUrl}/api/pets/breeds/${breedId}/stores`;
     console.log(`Fetching available stores from: ${apiUrl}`);
     
     const response = await fetch(apiUrl, {
