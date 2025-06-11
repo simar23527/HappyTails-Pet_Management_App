@@ -39,11 +39,20 @@ except Exception as e:
 
 @app.route('/')
 def index():
-    return jsonify({
-        "message": "Happy Tales API v2.1 - UPDATED NOW", 
-        "status": "working",
-        "timestamp": "2025-06-11"
-    })
+    from flask import make_response
+    response = make_response(jsonify({
+        "message": "Happy Tales API v2.2 - CACHE BUSTED", 
+        "status": "active",
+        "version": "latest"
+    }))
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
+
+@app.route('/health')
+def health_check():
+    return jsonify({"status": "healthy", "api_version": "2.2"})
 
 @app.route('/test-db')
 def test_db():
