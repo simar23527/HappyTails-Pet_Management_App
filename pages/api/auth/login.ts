@@ -13,12 +13,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Get the Flask backend URL with cache busting
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://happy-tails-api.onrender.com';
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL;
+    if (!backendUrl) {
+      return res.status(500).json({ error: 'Backend URL not configured' });
+    }
     const timestamp = Date.now();
     
     console.log(`Attempting login to: ${backendUrl}/api/users/login?t=${timestamp}`);
     
     // Forward the request to Flask backend with cache-busting
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    
     const response = await fetch(`${backendUrl}/api/users/login?t=${timestamp}`, {
       method: 'POST',
       headers: {
@@ -28,7 +34,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         'Expires': '0'
       },
       body: JSON.stringify({ username, password }),
+      signal: controller.signal,
     });
+    
+    clearTimeout(timeoutId);
 
     console.log(`Backend response status: ${response.status}`);
     const data = await response.json();
