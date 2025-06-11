@@ -2,12 +2,25 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import os
 from services.database import Database
-from routes.pet_routes import pet_routes
-from routes.product_routes import product_routes
-from routes.vet_routes import vet_routes
-from routes.user_routes import user_routes
-from routes.order_routes import order_routes
-from routes.shopping_category_routes import shopping_category_routes
+try:
+    print("Importing route modules...")
+    from routes.pet_routes import pet_routes
+    print("Successfully imported pet_routes")
+    from routes.product_routes import product_routes
+    print("Successfully imported product_routes")
+    from routes.vet_routes import vet_routes
+    print("Successfully imported vet_routes")
+    from routes.user_routes import user_routes
+    print("Successfully imported user_routes")
+    from routes.order_routes import order_routes
+    print("Successfully imported order_routes")
+    from routes.shopping_category_routes import shopping_category_routes
+    print("Successfully imported shopping_category_routes")
+    print("All route imports successful!")
+except Exception as e:
+    print(f"ERROR importing routes: {e}")
+    import traceback
+    traceback.print_exc()
 
 app = Flask(__name__)
 
@@ -21,12 +34,20 @@ CORS(app, resources={
 })
 
 # Register all route blueprints
+print("Registering route blueprints...")
 app.register_blueprint(pet_routes, url_prefix='/api/pets')
+print("Registered pet_routes")
 app.register_blueprint(product_routes, url_prefix='/api/products')
+print("Registered product_routes")
 app.register_blueprint(vet_routes, url_prefix='/api/vets')
+print("Registered vet_routes")
 app.register_blueprint(user_routes, url_prefix='/api/users')
+print("Registered user_routes")
 app.register_blueprint(order_routes, url_prefix='/api/orders')
+print("Registered order_routes")
 app.register_blueprint(shopping_category_routes, url_prefix='/api/shopping-categories')
+print("Registered shopping_category_routes")
+print("All routes registered successfully!")
 
 @app.route('/')
 def index():
