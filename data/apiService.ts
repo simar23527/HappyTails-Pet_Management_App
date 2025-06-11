@@ -98,7 +98,7 @@ export const getPetTypes = async () => {
 
 export const getBreedsByPetType = async (petTypeId: number) => {
   try {
-    const response = await apiClient.get(`/pets/types/${petTypeId}/breeds`);
+    const response = await apiClient.get(`/pets/breeds?petTypeId=${petTypeId}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching breeds:', error);
