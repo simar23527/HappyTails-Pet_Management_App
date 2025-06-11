@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+// Use Next.js API routes instead of direct backend calls
+const API_URL = '/api';
 
 console.log('API URL:', API_URL); // Debug log
 
@@ -10,7 +11,7 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json'
   },
-  timeout: 5000, // 5 second timeout
+  timeout: 30000, // 30 second timeout
 });
 
 // Add request interceptor for debugging
