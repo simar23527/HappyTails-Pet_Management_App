@@ -41,9 +41,8 @@ except Exception as e:
 def index():
     from flask import make_response
     response = make_response(jsonify({
-        "message": "Happy Tales API v2.2 - CACHE BUSTED", 
-        "status": "active",
-        "version": "latest"
+        "message": "Happy Tales API - CACHE BROKEN v3.1", 
+        "status": "working"
     }))
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     response.headers['Pragma'] = 'no-cache'
@@ -58,6 +57,14 @@ def health_check():
 def log_request_info():
     print(f"Request: {request.method} {request.url}")
     print(f"Endpoint: {request.endpoint}")
+
+@app.route('/api/test-direct')
+def test_direct():
+    return jsonify({
+        "message": "DIRECT ROUTE WORKS!",
+        "status": "success",
+        "test": "This route is in app.py, not a blueprint"
+    })
 
 @app.route('/test-db')
 def test_db():
