@@ -9,8 +9,9 @@ interface Store {
   id: number;
   name: string;
   address: string;
-  contact: string;
+  contactnumber: string;
   city: string;
+  state: string;
   available: number;
 }
 
@@ -157,7 +158,7 @@ const AdoptForm = () => {
                   <Phone className="h-5 w-5 text-purple-600 mt-0.5 mr-3" />
                   <div>
                     <p className="font-medium">Store Contact</p>
-                    <p className="text-gray-600">{selectedStore.contact}</p>
+                    <p className="text-gray-600">{selectedStore.contactnumber}</p>
                   </div>
                 </div>
                 <div className="flex items-start">
