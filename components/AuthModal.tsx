@@ -51,7 +51,8 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }: AuthModalProps) => {
     try {
       if (isLogin) {
         // Handle login
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/login`, {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://happy-tails-api.onrender.com';
+        const response = await fetch(`${apiUrl}/api/users/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -90,7 +91,8 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }: AuthModalProps) => {
         router.push('/home');
       } else {
         // Handle signup
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/register`, {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://happy-tails-api.onrender.com';
+        const response = await fetch(`${apiUrl}/api/users/register`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -120,7 +122,12 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }: AuthModalProps) => {
         });
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      console.error('Auth error:', err);
+      if (err instanceof TypeError && err.message.includes('fetch')) {
+        setError('Unable to connect to server. Please check your internet connection.');
+      } else {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      }
     } finally {
       setIsLoading(false);
     }
