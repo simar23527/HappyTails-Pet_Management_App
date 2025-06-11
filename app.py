@@ -39,7 +39,11 @@ except Exception as e:
 
 @app.route('/')
 def index():
-    return jsonify({"message": "Happy Tales API - Fixed Version"})
+    return jsonify({
+        "message": "Happy Tales API v2.1 - UPDATED NOW", 
+        "status": "working",
+        "timestamp": "2025-06-11"
+    })
 
 @app.route('/test-db')
 def test_db():
