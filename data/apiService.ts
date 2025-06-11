@@ -426,7 +426,7 @@ interface Store {
 
 export const getAvailableStores = async (breedId: string): Promise<Store[]> => {
   try {
-    const response = await fetch(`/api/stores/available?breedId=${breedId}`);
+    const response = await fetch(`/api/stores/available-proxy?breedId=${breedId}`);
     if (!response.ok) {
       throw new Error('Failed to fetch stores');
     }
