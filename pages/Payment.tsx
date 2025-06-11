@@ -39,9 +39,9 @@ const Payment = () => {
         shipping_info: JSON.parse(sessionStorage.getItem('shippingInfo') || '{}')
       };
 
-      // Create the order
+      // Create the order using Next.js API proxy
       console.log('Creating order with data:', orderData);
-      const createOrderResponse = await fetch('/api/orders/create', {
+      const createOrderResponse = await fetch('/api/orders/create-proxy', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
