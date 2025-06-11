@@ -51,7 +51,7 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }: AuthModalProps) => {
     try {
       if (isLogin) {
         // Handle login
-        const response = await fetch('/api/auth/login', {
+        const response = await fetch('/api/users/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -65,11 +65,14 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }: AuthModalProps) => {
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.message || 'Login failed');
+          throw new Error(data.error || 'Login failed');
         }
 
         // Store user data in localStorage
-        localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem('user', JSON.stringify({
+          username: data.username,
+          isLoggedIn: true
+        }));
         
         // Close modal and call onLoginSuccess if provided
         onClose();
@@ -81,7 +84,7 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }: AuthModalProps) => {
         router.push('/home');
       } else {
         // Handle signup
-        const response = await fetch('/api/auth/signup', {
+        const response = await fetch('/api/users/register', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -92,7 +95,7 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }: AuthModalProps) => {
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.message || 'Signup failed');
+          throw new Error(data.error || 'Signup failed');
         }
 
         // Switch to login form after successful signup
