@@ -419,8 +419,9 @@ interface Store {
   id: number;
   name: string;
   address: string;
-  contact: string;
+  contactnumber: string;
   city: string;
+  state: string;
   available: number;
 }
 
